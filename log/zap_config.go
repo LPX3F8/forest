@@ -2,7 +2,6 @@ package log
 
 import (
 	"os"
-	"path"
 	"sync"
 
 	"github.com/natefinch/lumberjack"
@@ -11,25 +10,52 @@ import (
 )
 
 type ZapConfig struct {
-	logFileName  atomic.String // logfile path, default os.TempDir()
-	logLevel     atomic.Value
-	maxSize      atomic.Int64 // logfile max size in MB, default 100MB
-	maxBackups   atomic.Int64 // logfile backups, default unlimited
-	maxAges      atomic.Int64 // logfile max save time of days, default unlimited
-	withCompress atomic.Bool  // logfile backups compress, default false
-	withStdout   atomic.Bool  // write log with console, default true
-	withCaller   atomic.Bool  // print log with caller, default true
+	logFileName  *atomic.String // logfile path, default os.TempDir()
+	logLevel     *atomic.String
+	maxSize      *atomic.Int64 // logfile max size in MB, default 512MB
+	maxBackups   *atomic.Int64 // logfile backups, default unlimited
+	maxAges      *atomic.Int64 // logfile max save time of days, default unlimited
+	withCompress *atomic.Bool  // logfile backups compress, default false
+	withStdout   *atomic.Bool  // write log with console, default true
+	withFile     *atomic.Bool  // write log into file, default false
+	withCaller   *atomic.Bool  // print log with caller, default true
 	*sync.Mutex
+}
+
+func NewDefaultZapConfig() *ZapConfig {
+	return &ZapConfig{
+		logFileName:  atomic.NewString(defLogFileName),
+		logLevel:     atomic.NewString(Debug.String()),
+		maxSize:      atomic.NewInt64(defMaxSize),
+		maxBackups:   atomic.NewInt64(defMAxBackups),
+		maxAges:      atomic.NewInt64(defMaxAges),
+		withCompress: atomic.NewBool(defEnableCompress),
+		withStdout:   atomic.NewBool(defEnableStdout),
+		withFile:     atomic.NewBool(defEnableWriteFile),
+		withCaller:   atomic.NewBool(defEnableCaller),
+		Mutex:        new(sync.Mutex),
+	}
 }
 
 // GetLogFilePath return the path of logfile
 func (c ZapConfig) GetLogFilePath() string {
-	return path.Join(c.logFileName.Load())
+	return c.logFileName.Load()
 }
 
 // GetLogLevel return the log level
 func (c ZapConfig) GetLogLevel() zapcore.Level {
-	return c.logLevel.Load().(zapcore.Level)
+	switch c.logLevel.Load() {
+	case Debug.String():
+		return zapcore.DebugLevel
+	case Info.String():
+		return zapcore.InfoLevel
+	case Warn.String():
+		return zapcore.WarnLevel
+	case Error.String():
+		return zapcore.ErrorLevel
+	default:
+		return defLogLevel
+	}
 }
 
 // WithCaller return need if print caller
@@ -40,6 +66,11 @@ func (c ZapConfig) WithCaller() bool {
 // WithStdout return need if print into os.stdout
 func (c ZapConfig) WithStdout() bool {
 	return c.withStdout.Load()
+}
+
+// WithFile return need if write log into file
+func (c ZapConfig) WithFile() bool {
+	return c.withFile.Load()
 }
 
 // GetLogFileRoller return the pointer of lumberjack.Logger
@@ -55,27 +86,23 @@ func (c ZapConfig) GetLogFileRoller() *lumberjack.Logger {
 
 // GetZapWriteSyncer return the writeSyncer with config
 func (c ZapConfig) GetZapWriteSyncer() zapcore.WriteSyncer {
-	ws := zapcore.AddSync(c.GetLogFileRoller())
-	if c.WithStdout() {
-		ws = zapcore.NewMultiWriteSyncer(zapcore.AddSync(os.Stdout), ws)
+	ws := make([]zapcore.WriteSyncer, 0)
+	if c.WithFile() {
+		ws = append(ws, zapcore.AddSync(c.GetLogFileRoller()))
 	}
-	return ws
+	if c.WithStdout() {
+		ws = append(ws, zapcore.AddSync(os.Stdout))
+	}
+
+	if len(ws) == 0 {
+		c.withStdout.Store(true)
+		return c.GetZapWriteSyncer()
+	}
+	return zapcore.NewMultiWriteSyncer(ws...)
 }
 
 func NewZapLogConfig(options ...Option) *ZapConfig {
-	c := &ZapConfig{Mutex: new(sync.Mutex)}
-
-	// default options
-	options = append([]Option{
-		WithLogFile(path.Join(os.TempDir(), defaultLogFile)),
-		WithMaxSize(512),
-		WithMaxBackups(2),
-		WithMaxAges(7),
-		WithCaller(true),
-		WithStdout(true),
-		WithLevel(zapcore.DebugLevel),
-	}, options...)
-
+	c := NewDefaultZapConfig()
 	for _, o := range options {
 		o(c)
 	}

@@ -113,26 +113,26 @@ func (b *BaseNode) _getOpenNodes() *orderedmap.OrderedMap[string, IBTreeNode] {
 
 func (b *BaseNode) _enter() {
 	b._openNode()
-	b.traceLog("_TRACE %s %s-> %s", "[EN]", strings.Repeat("-", b._getOpenNodes().Len()-1), b)
+	b.traceLog(traceLogTemp, "(EnterNode)", strings.Repeat("│", b.getNodeLevel()), b)
 }
 
 func (b *BaseNode) _before() (Status, bool) {
-	b.traceLog("_TRACE %s %s-> %s", "[BE]", strings.Repeat("-", b._getOpenNodes().Len()-1), b)
+	b.traceLog(traceLogTemp, "(BeforeTick)", strings.Repeat("│", b.getNodeLevel()), b)
 	return b.Ticker().OnBefore()
 }
 
 func (b *BaseNode) _tick() Status {
-	b.traceLog("_TRACE %s %s-> %s", "[TI]", strings.Repeat("-", b._getOpenNodes().Len()-1), b)
+	b.traceLog(traceLogTemp, "(TickMethod)", strings.Repeat("│", b.getNodeLevel()), b)
 	return b.Ticker().OnTick()
 }
 
 func (b *BaseNode) _after(status Status) Status {
-	b.traceLog("_TRACE %s %s-> %s", "[AF]", strings.Repeat("-", b._getOpenNodes().Len()-1), b)
+	b.traceLog(traceLogTemp, "(AfterTick)", strings.Repeat("│", b.getNodeLevel()), b)
 	return b.Ticker().OnAfter(status)
 }
 
 func (b *BaseNode) _exit() {
-	b.traceLog("_TRACE %s %s-> %s", "[EX]", strings.Repeat("-", b._getOpenNodes().Len()-1), b)
+	b.traceLog(traceLogExitNodeTemp, "(ExitNode)", strings.Repeat("│", b.getNodeLevel()), b)
 	b._closeNode()
 }
 
@@ -155,4 +155,11 @@ func (b *BaseNode) traceLog(template string, arg ...interface{}) {
 	b.withDebug(func() {
 		traceLogger.Debugf(template, arg...)
 	})
+}
+func (b *BaseNode) getNodeLevel() int {
+	if openNodes := b._getOpenNodes().Len(); openNodes > 0 {
+		return openNodes - 1
+	} else {
+		return openNodes
+	}
 }

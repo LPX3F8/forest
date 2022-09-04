@@ -32,19 +32,18 @@ import (
 var Logger *zap.SugaredLogger
 
 // NewLogger with zap & lumberjack
-func NewLogger(logPath string, level zapcore.Level, withStdout bool, option ...Option) *zap.SugaredLogger {
+func NewLogger(logPath string, level Level, withStdout bool, option ...Option) *zap.SugaredLogger {
 	option = append([]Option{
 		WithLogFile(logPath),
 		WithLevel(level),
-		WithStdout(withStdout),
-	}, option...)
+		WithStdout(withStdout)}, option...)
 	zc := NewZapLogConfig(option...)
 
 	// to set zap log config
 	encoderConfig := zapcore.EncoderConfig{
 		TimeKey:        "time",
 		LevelKey:       "level",
-		NameKey:        "genius",
+		NameKey:        "forest",
 		CallerKey:      "caller",
 		MessageKey:     "msg",
 		StacktraceKey:  "stacktrace",
@@ -57,7 +56,10 @@ func NewLogger(logPath string, level zapcore.Level, withStdout bool, option ...O
 	}
 
 	logger := zap.New(
-		zapcore.NewCore(zapcore.NewConsoleEncoder(encoderConfig), zc.GetZapWriteSyncer(), level),
+		zapcore.NewCore(
+			zapcore.NewConsoleEncoder(encoderConfig),
+			zc.GetZapWriteSyncer(),
+			zc.GetLogLevel()),
 		zap.WithCaller(zc.WithCaller()),
 		zap.Development(),
 	).Sugar()

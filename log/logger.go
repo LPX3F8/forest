@@ -12,4 +12,15 @@ type LevelLogger interface {
 	Errorln(args ...interface{})
 }
 
-const defaultLogFile = "forest.log"
+type Level string
+
+const (
+	Debug Level = "debug"
+	Info  Level = "info"
+	Warn  Level = "warn"
+	Error Level = "error"
+)
+
+func (l Level) String() string {
+	return string(l)
+}

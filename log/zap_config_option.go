@@ -1,14 +1,9 @@
 package log
 
-import "go.uber.org/zap/zapcore"
-
 type Option func(*ZapConfig)
 
 func WithLogFile(name string) Option {
 	return func(config *ZapConfig) {
-		if name == "" {
-			name = defaultLogFile
-		}
 		config.logFileName.Store(name)
 	}
 }
@@ -43,9 +38,9 @@ func WithStdout(stdout bool) Option {
 	}
 }
 
-func WithLevel(level zapcore.Level) Option {
+func WithLevel(level Level) Option {
 	return func(config *ZapConfig) {
-		config.logLevel.Store(level)
+		config.logLevel.Store(level.String())
 	}
 }
 
