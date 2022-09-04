@@ -9,6 +9,13 @@ type ITicker interface {
 	Errors() []error
 }
 
+type ITimer interface {
+	Start(label string)
+	Stop(label string)
+	Time(label string, f func())
+	Report() []*Period
+}
+
 type IBTreeNodeWrapper interface {
 	_enter()
 	_before() (Status, bool)
@@ -34,6 +41,7 @@ type IControlNode interface {
 	IBTreeNode
 	Children() []IBTreeNode
 	AddChild(child ...IBTreeNode)
+	ChildrenNum() int
 }
 
 type IActionNode interface {

@@ -25,6 +25,9 @@ SOFTWARE.
 package log
 
 import (
+	"fmt"
+	"os"
+
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -48,8 +51,8 @@ func NewLogger(logPath string, level Level, withStdout bool, option ...Option) *
 		MessageKey:     "msg",
 		StacktraceKey:  "stacktrace",
 		LineEnding:     zapcore.DefaultLineEnding,
-		EncodeLevel:    zapcore.LowercaseLevelEncoder,
-		EncodeTime:     zapcore.RFC3339TimeEncoder,
+		EncodeLevel:    zapcore.CapitalLevelEncoder,
+		EncodeTime:     zapcore.TimeEncoderOfLayout("2006/01/02 15:04:05"),
 		EncodeDuration: zapcore.SecondsDurationEncoder,
 		EncodeCaller:   zapcore.ShortCallerEncoder,
 		EncodeName:     zapcore.FullNameEncoder,
@@ -63,5 +66,8 @@ func NewLogger(logPath string, level Level, withStdout bool, option ...Option) *
 		zap.WithCaller(zc.WithCaller()),
 		zap.Development(),
 	).Sugar()
+	if zc.WithFile() {
+		_, _ = os.Stderr.WriteString(fmt.Sprintf("[NOTE] LogFilePath: %s\n", zc.GetLogFilePath()))
+	}
 	return logger
 }

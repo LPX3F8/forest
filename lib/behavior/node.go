@@ -2,7 +2,6 @@ package behavior
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/LPX3F8/orderedmap"
 	"github.com/google/uuid"
@@ -19,12 +18,13 @@ type BaseNode struct {
 	description string // node description
 	category    string // node category
 	ticker      ITicker
+	timer       ITimer
 	parameters  store.Store
 	properties  store.Store
 }
 
 func NewBaseNode(namespace, name string, category string, ticker ITicker) *BaseNode {
-	return &BaseNode{
+	n := &BaseNode{
 		id:          uuid.NewString(),
 		namespace:   namespace,
 		name:        name,
@@ -34,132 +34,148 @@ func NewBaseNode(namespace, name string, category string, ticker ITicker) *BaseN
 		parameters:  store.NewMemStore(),
 		properties:  store.NewMemStore(),
 	}
+	n.timer = NewSimpleTimer(n)
+	return n
 }
 
-func (b *BaseNode) ID() string {
-	return b.id
+func (n *BaseNode) ID() string {
+	return n.id
 }
 
-func (b *BaseNode) Namespace() string {
-	return b.namespace
+func (n *BaseNode) Namespace() string {
+	return n.namespace
 }
 
-func (b *BaseNode) Name() string {
-	return b.name
+func (n *BaseNode) Name() string {
+	return n.name
 }
 
-func (b *BaseNode) Description() string {
-	return b.description
+func (n *BaseNode) Description() string {
+	return n.description
 }
 
-func (b *BaseNode) Category() string {
-	return b.category
+func (n *BaseNode) SetDescription(description string) {
+	n.description = description
 }
 
-func (b *BaseNode) SetTicker(ticker ITicker) {
-	b.ticker = ticker
+func (n *BaseNode) Category() string {
+	return n.category
 }
 
-func (b *BaseNode) Ticker() ITicker {
-	return b.ticker
+func (n *BaseNode) SetTicker(ticker ITicker) {
+	n.ticker = ticker
 }
 
-func (b *BaseNode) Tick() Status {
-	b._enter()
-	defer b._exit()
+func (n *BaseNode) Ticker() ITicker {
+	return n.ticker
+}
+
+func (n *BaseNode) Timer() ITimer {
+	return n.timer
+}
+
+func (n *BaseNode) Tick() Status {
+	n._enter()
+	defer n._exit()
 
 	// before hock
-	status, skip := b._before()
+	status, skip := n._before()
 	if skip {
 		return status
 	}
 
 	// execute
-	status = b._tick()
+	status = n._tick()
 
 	// after hock
-	b._after(status)
+	n._after(status)
 	return status
 }
 
-func (b *BaseNode) String() string {
-	return fmt.Sprintf("%s|%s|%s|%s|%s", b.category, b.namespace, b.scope, b.name, b.id)
+func (n *BaseNode) String() string {
+	return fmt.Sprintf("%s|%s|%s|%s|%s", n.category, n.namespace, n.scope, n.name, n.id)
 }
 
-func (b *BaseNode) Blackboard() *blackboard.Blackboard {
-	return blackboard.TreeBlackboard(b.namespace, b.scope)
+func (n *BaseNode) Blackboard() *blackboard.Blackboard {
+	return blackboard.TreeBlackboard(n.namespace, n.scope)
 }
 
 const fOpenNodes = "_openNodes"
 
-func (b *BaseNode) _openNode() {
-	nodes := b._getOpenNodes()
-	nodes.Store(b.id, b)
-	b.Blackboard().Set(fOpenNodes, nodes)
+func (n *BaseNode) _openNode() {
+	nodes := n._getOpenNodes()
+	nodes.Store(n.id, n)
+	n.Blackboard().Set(fOpenNodes, nodes)
 }
-func (b *BaseNode) _closeNode() {
-	nodes := b._getOpenNodes()
-	nodes.Delete(b.id)
-	b.Blackboard().Set(fOpenNodes, nodes)
+func (n *BaseNode) _closeNode() {
+	nodes := n._getOpenNodes()
+	nodes.Delete(n.id)
+	n.Blackboard().Set(fOpenNodes, nodes)
 }
 
-func (b *BaseNode) _getOpenNodes() *orderedmap.OrderedMap[string, IBTreeNode] {
-	nodes, ok := blackboard.GetValue[*orderedmap.OrderedMap[string, IBTreeNode]](b.Blackboard(), fOpenNodes)
+func (n *BaseNode) _getOpenNodes() *orderedmap.OrderedMap[string, IBTreeNode] {
+	nodes, ok := blackboard.GetValue[*orderedmap.OrderedMap[string, IBTreeNode]](n.Blackboard(), fOpenNodes)
 	if !ok || nodes == nil {
 		nodes = orderedmap.New[string, IBTreeNode]()
 	}
 	return nodes
 }
 
-func (b *BaseNode) _enter() {
-	b._openNode()
-	b.traceLog(traceLogTemp, "(EnterNode)", strings.Repeat("│", b.getNodeLevel()), b)
+func (n *BaseNode) _enter() {
+	n.Timer().Time("_enter", func() {
+		n._openNode()
+		n.traceLog(traceLogTemp, "(EnterNode)", n)
+	})
 }
 
-func (b *BaseNode) _before() (Status, bool) {
-	b.traceLog(traceLogTemp, "(BeforeTick)", strings.Repeat("│", b.getNodeLevel()), b)
-	return b.Ticker().OnBefore()
+func (n *BaseNode) _before() (status Status, ok bool) {
+	n.Timer().Time("_before", func() {
+		n.traceLog(traceLogTemp, "(BeforeTick)", n)
+		status, ok = n.Ticker().OnBefore()
+	})
+	return
 }
 
-func (b *BaseNode) _tick() Status {
-	b.traceLog(traceLogTemp, "(TickMethod)", strings.Repeat("│", b.getNodeLevel()), b)
-	return b.Ticker().OnTick()
+func (n *BaseNode) _tick() (status Status) {
+	n.Timer().Time("_tick", func() {
+		n.traceLog(traceLogTemp, "(TickMethod)", n)
+		status = n.Ticker().OnTick()
+	})
+	return
 }
 
-func (b *BaseNode) _after(status Status) Status {
-	b.traceLog(traceLogTemp, "(AfterTick)", strings.Repeat("│", b.getNodeLevel()), b)
-	return b.Ticker().OnAfter(status)
+func (n *BaseNode) _after(status Status) Status {
+	n.Timer().Time("_after", func() {
+		n.traceLog(traceLogTemp, "(AfterTick)", n)
+		status = n.Ticker().OnAfter(status)
+	})
+	return status
 }
 
-func (b *BaseNode) _exit() {
-	b.traceLog(traceLogExitNodeTemp, "(ExitNode)", strings.Repeat("│", b.getNodeLevel()), b)
-	b._closeNode()
+func (n *BaseNode) _exit() {
+	n.Timer().Time("_exit", func() {
+		n.traceLog(traceLogTemp, "(ExitNode)", n)
+		n._closeNode()
+	})
 }
 
-func (b *BaseNode) isDebug() bool {
+func (n *BaseNode) isDebug() bool {
 	debugFlag := "f_debug"
-	if v, ok := store.GetValue[bool](b.properties, debugFlag); ok {
+	if v, ok := store.GetValue[bool](n.properties, debugFlag); ok {
 		return v
 	}
-	v, _ := blackboard.GetValue[bool](b.Blackboard(), debugFlag)
+	v, _ := blackboard.GetValue[bool](n.Blackboard(), debugFlag)
 	return v
 }
 
-func (b *BaseNode) withDebug(f func()) {
-	if b.isDebug() {
+func (n *BaseNode) withDebug(f func()) {
+	if n.isDebug() {
 		f()
 	}
 }
 
-func (b *BaseNode) traceLog(template string, arg ...interface{}) {
-	b.withDebug(func() {
+func (n *BaseNode) traceLog(template string, arg ...interface{}) {
+	n.withDebug(func() {
 		traceLogger.Debugf(template, arg...)
 	})
-}
-func (b *BaseNode) getNodeLevel() int {
-	if openNodes := b._getOpenNodes().Len(); openNodes > 0 {
-		return openNodes - 1
-	} else {
-		return openNodes
-	}
 }

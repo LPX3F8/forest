@@ -1,6 +1,10 @@
 package behavior
 
-import "github.com/LPX3F8/orderedmap"
+import (
+	"sync"
+
+	"github.com/LPX3F8/orderedmap"
+)
 
 type CompositeNode struct {
 	*BaseNode
@@ -18,8 +22,15 @@ func (n *CompositeNode) Children() []IBTreeNode {
 	return n.children.Slice()
 }
 
+func (n *CompositeNode) ChildrenNum() int {
+	return n.children.Len()
+}
+
 func (n *CompositeNode) AddChild(children ...IBTreeNode) {
 	for _, child := range children {
+		if child.ID() == n.ID() {
+			continue
+		}
 		n.children.Store(child.ID(), child)
 	}
 }
@@ -44,5 +55,50 @@ func (n *SequenceNode) OnTick() Status {
 			return childStatus
 		}
 	}
+	return childStatus
+}
+
+type ParallelNode struct {
+	ITicker
+	*CompositeNode
+
+	mu     *sync.Mutex
+	wg     *sync.WaitGroup
+	result *orderedmap.OrderedMap[string, Status]
+}
+
+func NewParallelNode(namespace, name string) *ParallelNode {
+	n := &ParallelNode{
+		ITicker: NewBaseTicker(),
+		wg:      new(sync.WaitGroup),
+		mu:      new(sync.Mutex),
+		result:  orderedmap.New[string, Status](),
+	}
+	n.CompositeNode = NewCompositeNode(namespace, name, CategorySequenceNode, n)
+	return n
+}
+
+func (n *ParallelNode) OnTick() Status {
+	n.wg.Add(n.ChildrenNum())
+	for _, child := range n.Children() {
+		go func(c IBTreeNode) {
+			n.CompositeNode.BaseNode.Timer().Time(c.ID(), func() {
+				defer n.wg.Done()
+				status := c.Tick()
+				n.result.Store(c.ID(), status)
+				n.mu.Lock()
+				n.SetError(c.Ticker().Errors()...)
+				n.mu.Unlock()
+			})
+		}(child)
+	}
+	n.wg.Wait()
+
+	var childStatus = Failure
+	n.result.TravelForward(func(idx int, nodeId string, status Status) bool {
+		childStatus = status
+		return status != Success
+	})
+
 	return childStatus
 }

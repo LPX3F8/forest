@@ -94,10 +94,6 @@ func (c ZapConfig) GetZapWriteSyncer() zapcore.WriteSyncer {
 		ws = append(ws, zapcore.AddSync(os.Stdout))
 	}
 
-	if len(ws) == 0 {
-		c.withStdout.Store(true)
-		return c.GetZapWriteSyncer()
-	}
 	return zapcore.NewMultiWriteSyncer(ws...)
 }
 

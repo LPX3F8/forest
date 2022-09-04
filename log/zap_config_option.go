@@ -8,6 +8,12 @@ func WithLogFile(name string) Option {
 	}
 }
 
+func WithWriteLogInFile(enable bool) Option {
+	return func(config *ZapConfig) {
+		config.withFile.Store(enable)
+	}
+}
+
 func WithMaxSize(size int) Option {
 	return func(config *ZapConfig) {
 		config.maxSize.Store(int64(size))

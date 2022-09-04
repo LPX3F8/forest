@@ -37,5 +37,4 @@ const (
 	CategorySequenceNode  = "SequenceNode"
 )
 
-const traceLogTemp = "_TRACE%-12s %s├ %s"
-const traceLogExitNodeTemp = "_TRACE%-12s %s└ %s"
+const traceLogTemp = "_TRACE%-12s %s"

@@ -17,7 +17,12 @@ func (b *BaseTicker) OnAfter(status Status) Status {
 }
 
 func (b *BaseTicker) SetError(err ...error) {
-	b.errs = append(b.errs, err...)
+	for _, e := range err {
+		if e == nil {
+			continue
+		}
+		b.errs = append(b.errs, e)
+	}
 }
 
 func (b *BaseTicker) OnTick() Status {
