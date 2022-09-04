@@ -31,15 +31,15 @@ import (
 )
 
 func TestInitLogger(t *testing.T) {
-	NewLogger("", zap.InfoLevel, true)
+	NewLogger("", Info, true)
 	Logger.Desugar().Info("test desugar", zap.String("test-k", "test-v"))
-	NewLogger("", zap.WarnLevel, false, WithCompress(true))
+	NewLogger("", Warn, false, WithCompress(true))
 	Logger.Desugar().Info("test desugar", zap.String("test-k", "test-v"))
 }
 
 func BenchmarkInitLogger(b *testing.B) {
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
-		NewLogger("", zap.InfoLevel, false)
+		NewLogger("", Info, false)
 	}
 }
