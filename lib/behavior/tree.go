@@ -12,7 +12,19 @@ type Tree struct {
 	id        string
 	namespace string
 	name      string
-	root      *SequenceNode
+	root      IControlNode
+}
+
+func (t *Tree) Id() string {
+	return t.id
+}
+
+func (t *Tree) Namespace() string {
+	return t.namespace
+}
+
+func (t *Tree) Name() string {
+	return t.name
 }
 
 func NewTree(namespace, name string) *Tree {
@@ -20,9 +32,21 @@ func NewTree(namespace, name string) *Tree {
 		id:        uuid.NewString(),
 		namespace: namespace,
 		name:      name,
-		root:      NewSequenceNode(namespace, name),
 	}
+	t.root = NewSequenceNode(t, "root")
 	return t
+}
+
+func (t *Tree) Blackboard() *Blackboard {
+	return TreeBlackboard(t.Namespace(), t.Id())
+}
+
+func (t *Tree) AddChild(child ...IBTreeNode) {
+	t.root.AddChild(child...)
+}
+
+func (t *Tree) Tick() Status {
+	return t.root.Tick()
 }
 
 func (t *Tree) PrintTree() {

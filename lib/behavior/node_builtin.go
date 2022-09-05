@@ -11,9 +11,9 @@ type SequenceNode struct {
 	*CompositeNode
 }
 
-func NewSequenceNode(namespace, name string) *SequenceNode {
+func NewSequenceNode(tree *Tree, name string) *SequenceNode {
 	n := &SequenceNode{ITicker: NewBaseTicker()}
-	n.CompositeNode = NewCompositeNode(namespace, name, CategorySequenceNode, n)
+	n.CompositeNode = NewCompositeNode(tree, name, CategorySequenceNode, n)
 	return n
 }
 
@@ -34,9 +34,9 @@ type FallbackNode struct {
 	*CompositeNode
 }
 
-func NewFallbackNode(namespace, name string) *FallbackNode {
+func NewFallbackNode(tree *Tree, name string) *FallbackNode {
 	n := &FallbackNode{ITicker: NewBaseTicker()}
-	n.CompositeNode = NewCompositeNode(namespace, name, CategoryFallbackNode, n)
+	n.CompositeNode = NewCompositeNode(tree, name, CategoryFallbackNode, n)
 	return n
 }
 
@@ -61,14 +61,14 @@ type ParallelNode struct {
 	result *orderedmap.OrderedMap[string, Status]
 }
 
-func NewParallelNode(namespace, name string) *ParallelNode {
+func NewParallelNode(tree *Tree, name string) *ParallelNode {
 	n := &ParallelNode{
 		ITicker: NewBaseTicker(),
 		wg:      new(sync.WaitGroup),
 		mu:      new(sync.Mutex),
 		result:  orderedmap.New[string, Status](),
 	}
-	n.CompositeNode = NewCompositeNode(namespace, name, CategorySequenceNode, n)
+	n.CompositeNode = NewCompositeNode(tree, name, CategorySequenceNode, n)
 	return n
 }
 

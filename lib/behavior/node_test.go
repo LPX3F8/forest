@@ -1,6 +1,7 @@
 package behavior
 
 import (
+	"fmt"
 	"math/rand"
 	"testing"
 	"time"
@@ -19,56 +20,48 @@ func (a *TestAction) OnTick() Status {
 }
 
 func TestSequenceNode_Tick(t *testing.T) {
-	scope := "test"
+	tree := NewTree("test", "testTree")
+	tree.Blackboard().Set("f_debug", true)
 
-	n := NewSequenceNode("test", "Seq1")
-	n.scope = scope
-	n.Blackboard().Set("f_debug", true)
+	n := NewSequenceNode(tree, "Seq1")
+	tree.AddChild(n)
 
-	n2 := NewSequenceNode("test", "Seq2")
-	n2.scope = scope
-
+	n2 := NewSequenceNode(tree, "Seq2")
 	a1 := &TestAction{ITicker: NewBaseTicker(), res: Success}
-	a1.BaseNode = NewBaseNode("test", "action1", CategoryActionNode, a1)
-	a1.scope = scope
+	a1.BaseNode = NewBaseNode(tree, "action1", CategoryActionNode, a1)
 	a2 := &TestAction{ITicker: NewBaseTicker(), res: Success}
-	a2.BaseNode = NewBaseNode("test", "action2", CategoryActionNode, a2)
-	a2.scope = scope
+	a2.BaseNode = NewBaseNode(tree, "action2", CategoryActionNode, a2)
 	a3 := &TestAction{ITicker: NewBaseTicker(), res: Success}
-	a3.BaseNode = NewBaseNode("test", "action3", CategoryActionNode, a3)
-	a3.scope = scope
+	a3.BaseNode = NewBaseNode(tree, "action3", CategoryActionNode, a3)
 
 	n.AddChild(n2)
 	n2.AddChild(a1, a2, a3)
-	n.Tick()
+
+	tree.Tick()
 }
 
 func TestParallelNode_Tick(t *testing.T) {
-	scope := "test"
+	tree := NewTree("test", "testTree")
+	tree.Blackboard().Set("f_debug", true)
 
-	n := NewParallelNode("test", "Para1")
-	n.scope = scope
-	n.Blackboard().Set("f_debug", true)
+	n := NewParallelNode(tree, "Para1")
+	tree.AddChild(n)
 
 	a1 := &TestAction{ITicker: NewBaseTicker(), res: Success}
-	a1.BaseNode = NewBaseNode("test", "action1", CategoryActionNode, a1)
-	a1.scope = scope
+	a1.BaseNode = NewBaseNode(tree, "action1", CategoryActionNode, a1)
 	a2 := &TestAction{ITicker: NewBaseTicker(), res: Success}
-	a2.BaseNode = NewBaseNode("test", "action2", CategoryActionNode, a2)
-	a2.scope = scope
+	a2.BaseNode = NewBaseNode(tree, "action2", CategoryActionNode, a2)
 	a3 := &TestAction{ITicker: NewBaseTicker(), res: Success}
-	a3.BaseNode = NewBaseNode("test", "action3", CategoryActionNode, a3)
-	a3.scope = scope
+	a3.BaseNode = NewBaseNode(tree, "action3", CategoryActionNode, a3)
 
 	n.AddChild(a1, a2, a3)
-	//n.Tick()
-	//
-	//timeFormat := "2006/01/02 15:04:05"
-	//for _, timer := range n.CompositeNode.BaseNode.Timer().Report() {
-	//	fmt.Printf("[%s] start: %s, end: %s duration: %s\n",
-	//		timer.Label, timer.StartTime.Format(timeFormat), timer.EndTime.Format(timeFormat), timer.Duration)
-	//}
-	tt := NewTree("test", "test")
-	tt.root.AddChild(n)
-	tt.PrintTree()
+	tree.PrintTree()
+
+	tree.Tick()
+
+	timeFormat := "2006/01/02 15:04:05"
+	for _, timer := range n.CompositeNode.BaseNode.Timer().Report() {
+		fmt.Printf("[%s] start: %s, end: %s duration: %s\n",
+			timer.Label, timer.StartTime.Format(timeFormat), timer.EndTime.Format(timeFormat), timer.Duration)
+	}
 }

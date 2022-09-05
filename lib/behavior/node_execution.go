@@ -4,8 +4,8 @@ type Action struct {
 	*BaseNode
 }
 
-func NewAction(namespace, name string, ticker ITicker) *Action {
-	return &Action{NewBaseNode(namespace, name, CategoryActionNode, ticker)}
+func NewAction(tree *Tree, name string, ticker ITicker) *Action {
+	return &Action{NewBaseNode(tree, name, CategoryActionNode, ticker)}
 }
 
 type Condition struct {
@@ -13,9 +13,9 @@ type Condition struct {
 	*BaseNode
 }
 
-func NewCondition(namespace, name string) *Condition {
+func NewCondition(tree *Tree, name string) *Condition {
 	n := &Condition{ITicker: NewBaseTicker()}
-	n.BaseNode = NewBaseNode(namespace, name, CategoryConditionNode, n)
+	n.BaseNode = NewBaseNode(tree, name, CategoryConditionNode, n)
 	return n
 }
 

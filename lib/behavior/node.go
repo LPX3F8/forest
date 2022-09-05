@@ -20,18 +20,21 @@ type BaseNode struct {
 	timer       ITimer
 	parameters  store.Store
 	properties  store.Store
+	tree        *Tree
 }
 
-func NewBaseNode(namespace, name string, category string, ticker ITicker) *BaseNode {
+func NewBaseNode(tree *Tree, name, category string, ticker ITicker) *BaseNode {
 	n := &BaseNode{
 		id:          uuid.NewString(),
-		namespace:   namespace,
+		namespace:   tree.Namespace(),
+		scope:       tree.Id(),
 		name:        name,
 		description: "",
 		category:    category,
 		ticker:      ticker,
 		parameters:  store.NewMemStore(),
 		properties:  store.NewMemStore(),
+		tree:        tree,
 	}
 	n.timer = NewSimpleTimer(n)
 	return n
@@ -92,7 +95,7 @@ func (n *BaseNode) Tick() Status {
 }
 
 func (n *BaseNode) String() string {
-	return fmt.Sprintf("%s|%s|%s|%s|%s", n.category, n.namespace, n.scope, n.name, n.id)
+	return fmt.Sprintf("%s|%s|%s|%s", n.category, n.namespace, n.name, n.id)
 }
 
 func (n *BaseNode) Blackboard() *Blackboard {

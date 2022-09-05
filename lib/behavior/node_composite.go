@@ -9,9 +9,9 @@ type CompositeNode struct {
 	children *orderedmap.OrderedMap[string, IBTreeNode]
 }
 
-func NewCompositeNode(namespace, name string, category string, ticker ITicker) *CompositeNode {
+func NewCompositeNode(tree *Tree, name string, category string, ticker ITicker) *CompositeNode {
 	return &CompositeNode{
-		BaseNode: NewBaseNode(namespace, name, category, ticker),
+		BaseNode: NewBaseNode(tree, name, category, ticker),
 		children: orderedmap.New[string, IBTreeNode](),
 	}
 }
