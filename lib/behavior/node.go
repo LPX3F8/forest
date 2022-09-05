@@ -6,7 +6,6 @@ import (
 	"github.com/LPX3F8/orderedmap"
 	"github.com/google/uuid"
 
-	"github.com/LPX3F8/froest/lib/behavior/blackboard"
 	"github.com/LPX3F8/froest/lib/store"
 )
 
@@ -96,8 +95,8 @@ func (n *BaseNode) String() string {
 	return fmt.Sprintf("%s|%s|%s|%s|%s", n.category, n.namespace, n.scope, n.name, n.id)
 }
 
-func (n *BaseNode) Blackboard() *blackboard.Blackboard {
-	return blackboard.TreeBlackboard(n.namespace, n.scope)
+func (n *BaseNode) Blackboard() *Blackboard {
+	return TreeBlackboard(n.namespace, n.scope)
 }
 
 const fOpenNodes = "_openNodes"
@@ -114,7 +113,7 @@ func (n *BaseNode) _closeNode() {
 }
 
 func (n *BaseNode) _getOpenNodes() *orderedmap.OrderedMap[string, IBTreeNode] {
-	nodes, ok := blackboard.GetValue[*orderedmap.OrderedMap[string, IBTreeNode]](n.Blackboard(), fOpenNodes)
+	nodes, ok := GetValue[*orderedmap.OrderedMap[string, IBTreeNode]](n.Blackboard(), fOpenNodes)
 	if !ok || nodes == nil {
 		nodes = orderedmap.New[string, IBTreeNode]()
 	}
@@ -164,7 +163,7 @@ func (n *BaseNode) isDebug() bool {
 	if v, ok := store.GetValue[bool](n.properties, debugFlag); ok {
 		return v
 	}
-	v, _ := blackboard.GetValue[bool](n.Blackboard(), debugFlag)
+	v, _ := GetValue[bool](n.Blackboard(), debugFlag)
 	return v
 }
 

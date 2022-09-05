@@ -27,5 +27,5 @@ func (c *Condition) OnTick() Status {
 }
 
 func (c *Condition) Cond() bool {
-	panic("implement me")
+	return false
 }

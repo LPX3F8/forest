@@ -1,7 +1,6 @@
 package behavior
 
 import (
-	"fmt"
 	"math/rand"
 	"testing"
 	"time"
@@ -62,11 +61,14 @@ func TestParallelNode_Tick(t *testing.T) {
 	a3.scope = scope
 
 	n.AddChild(a1, a2, a3)
-	n.Tick()
-
-	timeFormat := "2006/01/02 15:04:05"
-	for _, timer := range n.CompositeNode.BaseNode.Timer().Report() {
-		fmt.Printf("[%s] start: %s, end: %s duration: %s\n",
-			timer.Label, timer.StartTime.Format(timeFormat), timer.EndTime.Format(timeFormat), timer.Duration)
-	}
+	//n.Tick()
+	//
+	//timeFormat := "2006/01/02 15:04:05"
+	//for _, timer := range n.CompositeNode.BaseNode.Timer().Report() {
+	//	fmt.Printf("[%s] start: %s, end: %s duration: %s\n",
+	//		timer.Label, timer.StartTime.Format(timeFormat), timer.EndTime.Format(timeFormat), timer.Duration)
+	//}
+	tt := NewTree("test", "test")
+	tt.root.AddChild(n)
+	tt.PrintTree()
 }

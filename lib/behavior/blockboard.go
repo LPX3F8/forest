@@ -1,4 +1,4 @@
-package blackboard
+package behavior
 
 import (
 	"github.com/LPX3F8/froest/lib/store"

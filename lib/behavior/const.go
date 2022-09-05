@@ -32,9 +32,10 @@ func (S Status) String() string {
 const (
 	CategoryTreeNode      = "TreeNode"
 	CategoryLeafNode      = "LeafNode"
-	CategoryActionNode    = "ActionNode"
-	CategoryConditionNode = "ConditionNode"
-	CategorySequenceNode  = "SequenceNode"
+	CategoryActionNode    = "Action"
+	CategoryConditionNode = "Condition"
+	CategorySequenceNode  = "Sequence"
+	CategoryFallbackNode  = "Fallback"
 )
 
 const traceLogTemp = "_TRACE%-12s %s"

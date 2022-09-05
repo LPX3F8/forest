@@ -1,4 +1,4 @@
-package blackboard
+package behavior
 
 import (
 	"sync"
