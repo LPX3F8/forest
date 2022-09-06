@@ -18,7 +18,7 @@ func NewSequenceNode(tree *Tree, name string) IControlNode {
 }
 
 func (n *SequenceNode) OnTick() Status {
-	var childStatus Status
+	childStatus := Failure
 	for _, child := range n.Children() {
 		childStatus = child.Tick()
 		if childStatus != Success {
@@ -41,7 +41,7 @@ func NewFallbackNode(tree *Tree, name string) IControlNode {
 }
 
 func (n *FallbackNode) OnTick() Status {
-	var childStatus Status
+	childStatus := Failure
 	for _, child := range n.Children() {
 		childStatus = child.Tick()
 		if childStatus != Failure {

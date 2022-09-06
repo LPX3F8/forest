@@ -46,10 +46,11 @@ func TestTree(t *testing.T) {
 	a1 := newTestAction(tree, "action1")
 	a2 := newTestAction(tree, "action2")
 	a3 := newTestAction(tree, "action3")
-	n.AddChild(n2)
+	a4 := newTestAction(tree, "action4")
+	n.AddChild(a4)
 	n2.AddChild(a1, a2, a3)
 
-	tree.AddChild(n)
+	tree.AddChild(n, n2)
 	tree.PrintTree()
 	tree.Tick()
 	tree.Report()
@@ -62,7 +63,7 @@ func TestTree(t *testing.T) {
 	tree2, err := BuildTree(treeInfo)
 	a.NoError(err)
 	tree2.PrintTree()
-	a.Equal(Success, tree2.Tick())
+	a.Equal(Success.String(), tree2.Tick().String())
 	tree2.Report()
 
 	b2, err := json.Marshal(tree2.Serialize())
