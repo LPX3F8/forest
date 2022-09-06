@@ -49,6 +49,30 @@ func (t *Tree) Tick() Status {
 	return t.root.Tick()
 }
 
+func (t *Tree) Report() {
+	// TODO: this func just for test, should be replaced when all complete
+	Visit(t.root, func(level int, node IBTreeNode) (skip bool, err error) {
+		for _, timer := range node.Timer().Report() {
+			fmt.Printf("[%s][%s] start: %s, end: %s duration: %s\n",
+				node.Name(), timer.Label, timer.StartTime.Format("2006/01/02 15:04:05"), timer.EndTime.Format("2006/01/02 15:04:05"), timer.Duration)
+		}
+		return false, nil
+	})
+}
+
+func (t *Tree) Serialize() *TreeInfo {
+	ti := &TreeInfo{
+		Namespace:  t.Namespace(),
+		Name:       t.Name(),
+		Blackboard: t.Blackboard().Store().Dump(),
+		Nodes:      t.root.Serialize().Children,
+	}
+	for _, ignoreKey := range propIgnoreList {
+		delete(ti.Blackboard, ignoreKey)
+	}
+	return ti
+}
+
 func (t *Tree) PrintTree() {
 	sb := new(strings.Builder)
 	type S struct {
@@ -71,6 +95,10 @@ func (t *Tree) PrintTree() {
 		sb.WriteString(fmt.Sprintln(strings.Repeat(" │", e.Value.level), sep, e.Value.node))
 	}
 	fmt.Println(sb.String())
+}
+
+func (t *Tree) Visit(f func(level int, node IBTreeNode) (skip bool, err error)) error {
+	return Visit(t.root, f)
 }
 
 func Visit(node IBTreeNode, f func(level int, node IBTreeNode) (skip bool, err error)) error {

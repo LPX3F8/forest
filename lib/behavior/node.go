@@ -121,24 +121,25 @@ func (n *BaseNode) Serialize() *NodeInfo {
 		Properties:  n.Properties().Dump(),
 		Children:    []*NodeInfo{},
 	}
+	for _, ignoreKey := range propIgnoreList {
+		delete(ni.Properties, ignoreKey)
+	}
 	return ni
 }
-
-const fOpenNodes = "_openNodes"
 
 func (n *BaseNode) _openNode() {
 	nodes := n._getOpenNodes()
 	nodes.Store(n.id, n)
-	n.Blackboard().Set(fOpenNodes, nodes)
+	n.Blackboard().Set(TreePropOpenNodes, nodes)
 }
 func (n *BaseNode) _closeNode() {
 	nodes := n._getOpenNodes()
 	nodes.Delete(n.id)
-	n.Blackboard().Set(fOpenNodes, nodes)
+	n.Blackboard().Set(TreePropOpenNodes, nodes)
 }
 
 func (n *BaseNode) _getOpenNodes() *orderedmap.OrderedMap[string, IBTreeNode] {
-	nodes, ok := GetValue[*orderedmap.OrderedMap[string, IBTreeNode]](n.Blackboard(), fOpenNodes)
+	nodes, ok := GetValue[*orderedmap.OrderedMap[string, IBTreeNode]](n.Blackboard(), TreePropOpenNodes)
 	if !ok || nodes == nil {
 		nodes = orderedmap.New[string, IBTreeNode]()
 	}
@@ -184,11 +185,10 @@ func (n *BaseNode) _exit() {
 }
 
 func (n *BaseNode) isDebug() bool {
-	debugFlag := "f_debug"
-	if v, ok := store.GetValue[bool](n.properties, debugFlag); ok {
+	if v, ok := store.GetValue[bool](n.properties, TreePropDebug); ok {
 		return v
 	}
-	v, _ := GetValue[bool](n.Blackboard(), debugFlag)
+	v, _ := GetValue[bool](n.Blackboard(), TreePropDebug)
 	return v
 }
 

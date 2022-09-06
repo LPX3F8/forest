@@ -36,6 +36,7 @@ const (
 	CategoryConditionNode = "Condition"
 	CategorySequenceNode  = "Sequence"
 	CategoryFallbackNode  = "Fallback"
+	CategoryParallelNode  = "ParallelNode"
 )
 
 const traceLogTemp = "_TRACE%-12s %s"
@@ -45,3 +46,13 @@ const (
 	CondNodeFuncType   = "CondNodeFunc"
 	ActionNodeFuncType = "ActionNodeFunc"
 )
+
+const (
+	TreePropOpenNodes = "__openNodes"
+	TreePropDebug     = "__debug"
+)
+
+var propIgnoreList = []string{
+	TreePropOpenNodes,
+	TreePropDebug,
+}

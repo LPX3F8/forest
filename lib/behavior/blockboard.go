@@ -26,6 +26,10 @@ func (b *Blackboard) Get(k any) (any, bool) {
 	return b.store.Get(k)
 }
 
+func (b *Blackboard) Store() store.Store {
+	return b.store
+}
+
 func GetValue[T any](bb *Blackboard, key any) (T, bool) {
 	return store.GetValue[T](bb.store, key)
 }

@@ -13,7 +13,7 @@ type Condition struct {
 	*BaseNode
 }
 
-func NewCondition(tree *Tree, name string) *Condition {
+func NewCondition(tree *Tree, name string) IConditionNode {
 	n := &Condition{ITicker: NewBaseTicker()}
 	n.BaseNode = NewBaseNode(tree, name, CategoryConditionNode, n)
 	return n

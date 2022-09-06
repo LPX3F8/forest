@@ -9,8 +9,7 @@ import (
 type TreeInfo struct {
 	Namespace  string                 `json:"namespace"`
 	Name       string                 `json:"name"`
-	Parameters map[string]interface{} `json:"parameters"`
-	Properties map[string]interface{} `json:"properties"`
+	Blackboard map[string]interface{} `json:"blackboard"`
 	Nodes      []*NodeInfo            `json:"nodes"`
 }
 
@@ -26,7 +25,13 @@ type NodeInfo struct {
 }
 
 func BuildTree(treeInfo *TreeInfo) (*Tree, error) {
-	tree := NewTree(treeInfo.Namespace, treeInfo.Namespace)
+	tree := NewTree(treeInfo.Namespace, treeInfo.Name)
+	for k, v := range treeInfo.Blackboard {
+		if err := tree.Blackboard().Set(k, v); err != nil {
+			return nil, err
+		}
+	}
+
 	for _, child := range treeInfo.Nodes {
 		node, err := BuildNode(child, tree)
 		if err != nil {
@@ -34,6 +39,7 @@ func BuildTree(treeInfo *TreeInfo) (*Tree, error) {
 		}
 		tree.root.AddChild(node)
 	}
+
 	return tree, nil
 }
 

@@ -8,6 +8,25 @@ import (
 
 var nodeFactory *Factory
 
+func init() {
+	nodeFactory = NewFactory()
+	for k, v := range ctrlNodeFuncMap {
+		if err := nodeFactory.RegisterControlNode(k, v); err != nil {
+			panic(err)
+		}
+	}
+	for k, v := range condNodeFuncMap {
+		if err := nodeFactory.RegisterCondNodeFunc(k, v); err != nil {
+			panic(err)
+		}
+	}
+	for k, v := range actionNodeFuncMap {
+		if err := nodeFactory.RegisterActionNodeFunc(k, v); err != nil {
+			panic(err)
+		}
+	}
+}
+
 type CtrlNodeFunc func(tree *Tree, name string) IControlNode
 
 func (CtrlNodeFunc) String() string { return CtrlNodeFuncType }
@@ -81,22 +100,22 @@ func (f *Factory) NewNode(registerKey, name string, tree *Tree) (IBTreeNode, err
 }
 
 func (f *Factory) NewCtrlNode(nodeRegisterKey string, tree *Tree, name string) (IControlNode, error) {
-	if ff, ok := f.ctrlNodeFunc[nodeRegisterKey]; !ok {
+	if ff, ok := f.ctrlNodeFunc[nodeRegisterKey]; ok {
 		return ff(tree, name), nil
 	}
-	return nil, errors.New("control node type not fund")
+	return nil, errors.New("control node type not fund: " + nodeRegisterKey)
 }
 func (f *Factory) NewActionNode(nodeRegisterKey string, tree *Tree, name string) (IActionNode, error) {
-	if ff, ok := f.actionNodeFunc[nodeRegisterKey]; !ok {
+	if ff, ok := f.actionNodeFunc[nodeRegisterKey]; ok {
 		return ff(tree, name), nil
 	}
-	return nil, errors.New("control node type not fund")
+	return nil, errors.New("action node type not fund: " + nodeRegisterKey)
 }
 func (f *Factory) NewCondNode(nodeRegisterKey string, tree *Tree, name string) (IConditionNode, error) {
-	if ff, ok := f.condNodeFunc[nodeRegisterKey]; !ok {
+	if ff, ok := f.condNodeFunc[nodeRegisterKey]; ok {
 		return ff(tree, name), nil
 	}
-	return nil, errors.New("condition node type not fund")
+	return nil, errors.New("condition node type not fund: " + nodeRegisterKey)
 }
 
 func (f *Factory) NodeCategory(typ string) (string, error) {
@@ -104,7 +123,7 @@ func (f *Factory) NodeCategory(typ string) (string, error) {
 	var ok bool
 	err := f.withLock(func() error {
 		if category, ok = f.categoryMap[typ]; !ok {
-			return errors.New("node type not found")
+			return errors.New("node type not found: " + typ)
 		}
 		return nil
 	})
@@ -123,4 +142,14 @@ func (f *Factory) withLock(ff func() error) error {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 	return ff()
+}
+
+func RegisterControlNode(category string, nodeFunc CtrlNodeFunc) error {
+	return nodeFactory.RegisterControlNode(category, nodeFunc)
+}
+func RegisterCondNodeFunc(category string, nodeFunc CondNodeFunc) error {
+	return nodeFactory.RegisterCondNodeFunc(category, nodeFunc)
+}
+func RegisterActionNodeFunc(category string, nodeFunc ActionNodeFunc) error {
+	return nodeFactory.RegisterActionNodeFunc(category, nodeFunc)
 }

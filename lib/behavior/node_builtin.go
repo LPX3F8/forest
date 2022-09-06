@@ -68,7 +68,7 @@ func NewParallelNode(tree *Tree, name string) IControlNode {
 		mu:      new(sync.Mutex),
 		result:  orderedmap.New[string, Status](),
 	}
-	n.CompositeNode = NewCompositeNode(tree, name, CategorySequenceNode, n)
+	n.CompositeNode = NewCompositeNode(tree, name, CategoryFallbackNode, n)
 	return n
 }
 
