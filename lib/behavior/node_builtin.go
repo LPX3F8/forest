@@ -11,7 +11,7 @@ type SequenceNode struct {
 	*CompositeNode
 }
 
-func NewSequenceNode(tree *Tree, name string) *SequenceNode {
+func NewSequenceNode(tree *Tree, name string) IControlNode {
 	n := &SequenceNode{ITicker: NewBaseTicker()}
 	n.CompositeNode = NewCompositeNode(tree, name, CategorySequenceNode, n)
 	return n
@@ -34,7 +34,7 @@ type FallbackNode struct {
 	*CompositeNode
 }
 
-func NewFallbackNode(tree *Tree, name string) *FallbackNode {
+func NewFallbackNode(tree *Tree, name string) IControlNode {
 	n := &FallbackNode{ITicker: NewBaseTicker()}
 	n.CompositeNode = NewCompositeNode(tree, name, CategoryFallbackNode, n)
 	return n
@@ -61,7 +61,7 @@ type ParallelNode struct {
 	result *orderedmap.OrderedMap[string, Status]
 }
 
-func NewParallelNode(tree *Tree, name string) *ParallelNode {
+func NewParallelNode(tree *Tree, name string) IControlNode {
 	n := &ParallelNode{
 		ITicker: NewBaseTicker(),
 		wg:      new(sync.WaitGroup),

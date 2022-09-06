@@ -102,6 +102,14 @@ func (n *BaseNode) Blackboard() *Blackboard {
 	return TreeBlackboard(n.namespace, n.scope)
 }
 
+func (n *BaseNode) Parameters() store.Store {
+	return n.parameters
+}
+
+func (n *BaseNode) Properties() store.Store {
+	return n.properties
+}
+
 const fOpenNodes = "_openNodes"
 
 func (n *BaseNode) _openNode() {

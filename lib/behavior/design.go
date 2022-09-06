@@ -1,5 +1,7 @@
 package behavior
 
+import "github.com/LPX3F8/froest/lib/store"
+
 type ITicker interface {
 	OnBefore() (status Status, skip bool)
 	OnTick() Status
@@ -30,10 +32,14 @@ type IBTreeNode interface {
 	Name() string
 	Description() string
 	Category() string
-	SetTicker(ticker ITicker)
 	Ticker() ITicker
+	Timer() ITimer
+	Parameters() store.Store
+	Properties() store.Store
+
 	Tick() Status
 
+	SetTicker(ticker ITicker)
 	IBTreeNodeWrapper
 }
 

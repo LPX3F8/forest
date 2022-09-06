@@ -39,3 +39,9 @@ const (
 )
 
 const traceLogTemp = "_TRACE%-12s %s"
+
+const (
+	CtrlNodeFuncType   = "CtrlNodeFunc"
+	CondNodeFuncType   = "CondNodeFunc"
+	ActionNodeFuncType = "ActionNodeFunc"
+)

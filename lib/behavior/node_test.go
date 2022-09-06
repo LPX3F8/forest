@@ -60,7 +60,7 @@ func TestParallelNode_Tick(t *testing.T) {
 	tree.Tick()
 
 	timeFormat := "2006/01/02 15:04:05"
-	for _, timer := range n.CompositeNode.BaseNode.Timer().Report() {
+	for _, timer := range n.Timer().Report() {
 		fmt.Printf("[%s] start: %s, end: %s duration: %s\n",
 			timer.Label, timer.StartTime.Format(timeFormat), timer.EndTime.Format(timeFormat), timer.Duration)
 	}
