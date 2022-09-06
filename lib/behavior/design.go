@@ -3,6 +3,7 @@ package behavior
 import "github.com/LPX3F8/froest/lib/store"
 
 type ITicker interface {
+	TickerName() string
 	OnBefore() (status Status, skip bool)
 	OnTick() Status
 	OnAfter(status Status) Status
@@ -12,6 +13,7 @@ type ITicker interface {
 }
 
 type ITimer interface {
+	TimerName() string
 	Start(label string)
 	Stop(label string)
 	Time(label string, f func())
@@ -36,6 +38,7 @@ type IBTreeNode interface {
 	Timer() ITimer
 	Parameters() store.Store
 	Properties() store.Store
+	Serialize() *NodeInfo
 
 	Tick() Status
 

@@ -2,6 +2,7 @@ package store
 
 import (
 	"errors"
+	"fmt"
 	"sync"
 
 	j "github.com/json-iterator/go"
@@ -58,6 +59,17 @@ func (p *Memory) GetBool(name any) (bool, bool) {
 
 func (p *Memory) GetFloat64(name any) (float64, bool) {
 	return GetValue[float64](p, name)
+}
+
+func (p *Memory) Dump() map[string]interface{} {
+	p.RLock()
+	defer p.RUnlock()
+	dumper := make(map[string]interface{})
+	p.store.Range(func(key, value any) bool {
+		dumper[fmt.Sprintf("%v", key)] = value
+		return true
+	})
+	return dumper
 }
 
 func GetValue[T any](p Store, name any) (T, bool) {

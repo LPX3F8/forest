@@ -36,6 +36,10 @@ func NewSimpleTimer(node IBTreeNode) ITimer {
 	}
 }
 
+func (*Timer) TimerName() string {
+	return "default"
+}
+
 func (t *Timer) Start(label string) {
 	p := Period{Label: label}
 	if s, ok := t.periods.Load(label); ok {

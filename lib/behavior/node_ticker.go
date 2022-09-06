@@ -8,7 +8,11 @@ func NewBaseTicker() *BaseTicker {
 	return &BaseTicker{[]error{}}
 }
 
-func (b *BaseTicker) OnBefore() (status Status, skip bool) {
+func (*BaseTicker) TickerName() string {
+	return "default"
+}
+
+func (*BaseTicker) OnBefore() (status Status, skip bool) {
 	return Running, false
 }
 

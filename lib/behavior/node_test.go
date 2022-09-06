@@ -1,6 +1,7 @@
 package behavior
 
 import (
+	"encoding/json"
 	"fmt"
 	"math/rand"
 	"testing"
@@ -38,6 +39,13 @@ func TestSequenceNode_Tick(t *testing.T) {
 	n2.AddChild(a1, a2, a3)
 
 	tree.Tick()
+
+	if b, err := json.Marshal(tree.root.Serialize()); err != nil {
+		t.Fatal(err)
+	} else {
+		fmt.Printf(string(b))
+	}
+
 }
 
 func TestParallelNode_Tick(t *testing.T) {

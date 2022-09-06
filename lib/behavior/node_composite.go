@@ -32,3 +32,11 @@ func (n *CompositeNode) AddChild(children ...IBTreeNode) {
 		n.children.Store(child.ID(), child)
 	}
 }
+
+func (n *CompositeNode) Serialize() *NodeInfo {
+	ni := n.BaseNode.Serialize()
+	for _, child := range n.Children() {
+		ni.Children = append(ni.Children, child.Serialize())
+	}
+	return ni
+}

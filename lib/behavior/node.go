@@ -32,8 +32,8 @@ func NewBaseNode(tree *Tree, name, category string, ticker ITicker) *BaseNode {
 		description: "",
 		category:    category,
 		ticker:      ticker,
-		parameters:  store.NewMemStore(),
-		properties:  store.NewMemStore(),
+		parameters:  store.NewMemStore(), // TODO: support custom storage with options
+		properties:  store.NewMemStore(), // TODO: support custom storage with options
 		tree:        tree,
 	}
 	n.timer = NewSimpleTimer(n)
@@ -108,6 +108,20 @@ func (n *BaseNode) Parameters() store.Store {
 
 func (n *BaseNode) Properties() store.Store {
 	return n.properties
+}
+
+func (n *BaseNode) Serialize() *NodeInfo {
+	ni := &NodeInfo{
+		Name:        n.Name(),
+		Description: n.Description(),
+		NodeType:    n.Category(),
+		TickerName:  n.Ticker().TickerName(),
+		TimerName:   n.Timer().TimerName(),
+		Parameters:  n.Parameters().Dump(),
+		Properties:  n.Properties().Dump(),
+		Children:    []*NodeInfo{},
+	}
+	return ni
 }
 
 const fOpenNodes = "_openNodes"
