@@ -3,6 +3,7 @@ package behavior
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"math/rand"
 	"testing"
 	"time"
@@ -18,25 +19,63 @@ func init() {
 
 const categoryTestActionNode = "ActionTest"
 
-type TestAction struct {
+type testLogger struct {
+}
+
+func (t testLogger) Debugf(template string, args ...interface{}) {
+	log.Printf("[DEBUG]"+template, args...)
+}
+
+func (t testLogger) Infof(template string, args ...interface{}) {
+	log.Printf("[INFO]"+template, args...)
+}
+
+func (t testLogger) Warnf(template string, args ...interface{}) {
+	log.Printf("[WARN]"+template, args...)
+}
+
+func (t testLogger) Errorf(template string, args ...interface{}) {
+	log.Printf("[ERROR]"+template, args...)
+}
+
+func (t testLogger) Debugln(args ...interface{}) {
+	log.Println(append([]interface{}{"[DEBUG]"}, args...)...)
+}
+
+func (t testLogger) Infoln(args ...interface{}) {
+	log.Println(append([]interface{}{"[INFO]"}, args...)...)
+}
+
+func (t testLogger) Warnln(args ...interface{}) {
+	log.Println(append([]interface{}{"[WARN]"}, args...)...)
+}
+
+func (t testLogger) Errorln(args ...interface{}) {
+	//TODO implement me
+	panic("implement me")
+}
+
+type testAction struct {
 	ITicker
 	*BaseNode
 	res Status
 }
 
 func newTestAction(tree *Tree, name string) IActionNode {
-	n := &TestAction{ITicker: NewBaseTicker(), res: Success}
+	n := &testAction{ITicker: NewBaseTicker(), res: Success}
 	n.BaseNode = NewBaseNode(tree, name, categoryTestActionNode, n)
 	return n
 }
 
-func (a *TestAction) OnTick() Status {
+func (a *testAction) OnTick() Status {
 	rand.Seed(time.Now().UnixNano())
 	time.Sleep(time.Duration(rand.Intn(5)) * time.Second)
 	return a.res
 }
 
 func TestTree(t *testing.T) {
+	SetTraceLogger(testLogger{})
+
 	a := assert.New(t)
 	tree := NewTree("test", "testTree")
 	tree.Blackboard().Set(TreePropDebug, true)
@@ -77,6 +116,7 @@ func TestTree(t *testing.T) {
 }
 
 func TestFactory(t *testing.T) {
+	ResetTraceLogger()
 	a := assert.New(t)
 	treeDesc := `{"namespace":"test","name":"testTree","blackboard":{"f_debug":true},"nodes":[{"name":"Seq1","description":"","node_type":"Sequence","ticker_name":"default","timer_name":"default","parameters":{},"properties":{},"children":[{"name":"Seq2","description":"","node_type":"Sequence","ticker_name":"default","timer_name":"default","parameters":{},"properties":{},"children":[{"name":"action1","description":"","node_type":"ActionTest","ticker_name":"default","timer_name":"default","parameters":{},"properties":{},"children":[]},{"name":"action2","description":"","node_type":"ActionTest","ticker_name":"default","timer_name":"default","parameters":{},"properties":{},"children":[]},{"name":"action3","description":"","node_type":"ActionTest","ticker_name":"default","timer_name":"default","parameters":{},"properties":{},"children":[]}]}]}]}`
 
