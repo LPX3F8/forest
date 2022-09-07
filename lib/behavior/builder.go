@@ -43,7 +43,7 @@ func BuildTree(treeInfo *TreeInfo) (*Tree, error) {
 	return tree, nil
 }
 
-func BuildNode(info *NodeInfo, tree *Tree) (IBTreeNode, error) {
+func BuildNode(info *NodeInfo, tree *Tree) (ILeafNode, error) {
 	n, err := nodeFactory.NewNode(info.NodeType, info.Name, tree)
 	if err != nil {
 		return nil, err
@@ -56,12 +56,12 @@ func BuildNode(info *NodeInfo, tree *Tree) (IBTreeNode, error) {
 		return nil, err
 	}
 
-	ctrlNode, isCtrlNode := n.(IControlNode)
+	ctrlNode, isCtrlNode := n.(ITreeNode)
 	if len(info.Children) > 0 && !isCtrlNode {
-		return nil, errors.New("child nodes can only be added to IControlNode nodes")
+		return nil, errors.New("child nodes can only be added to ITreeNode nodes")
 	}
 	for _, childInfo := range info.Children {
-		var child IBTreeNode
+		var child ILeafNode
 		if child, err = BuildNode(childInfo, tree); err != nil {
 			return nil, err
 		}

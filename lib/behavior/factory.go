@@ -27,7 +27,7 @@ func init() {
 	}
 }
 
-type CtrlNodeFunc func(tree *Tree, name string) IControlNode
+type CtrlNodeFunc func(tree *Tree, name string) ITreeNode
 
 func (CtrlNodeFunc) String() string { return CtrlNodeFuncType }
 
@@ -76,12 +76,12 @@ func (f *Factory) RegisterActionNodeFunc(category string, nodeFunc ActionNodeFun
 	})
 }
 
-func (f *Factory) NewNode(registerKey, name string, tree *Tree) (IBTreeNode, error) {
+func (f *Factory) NewNode(registerKey, name string, tree *Tree) (ILeafNode, error) {
 	category, err := nodeFactory.NodeCategory(registerKey)
 	if err != nil {
 		return nil, err
 	}
-	var node IBTreeNode
+	var node ILeafNode
 	switch category {
 	case CondNodeFuncType:
 		if node, err = nodeFactory.NewCondNode(registerKey, tree, name); err != nil {
@@ -99,7 +99,7 @@ func (f *Factory) NewNode(registerKey, name string, tree *Tree) (IBTreeNode, err
 	return node, nil
 }
 
-func (f *Factory) NewCtrlNode(nodeRegisterKey string, tree *Tree, name string) (IControlNode, error) {
+func (f *Factory) NewCtrlNode(nodeRegisterKey string, tree *Tree, name string) (ITreeNode, error) {
 	if ff, ok := f.ctrlNodeFunc[nodeRegisterKey]; ok {
 		return ff(tree, name), nil
 	}

@@ -12,7 +12,7 @@ type Tree struct {
 	id        string
 	namespace string
 	name      string
-	root      IControlNode
+	root      ITreeNode
 }
 
 func (t *Tree) Id() string {
@@ -41,7 +41,7 @@ func (t *Tree) Blackboard() *Blackboard {
 	return TreeBlackboard(t.Namespace(), t.Id())
 }
 
-func (t *Tree) AddChild(child ...IBTreeNode) {
+func (t *Tree) AddChild(child ...ILeafNode) {
 	t.root.AddChild(child...)
 }
 
@@ -51,7 +51,7 @@ func (t *Tree) Tick() Status {
 
 func (t *Tree) Report() {
 	// TODO: this func just for test, should be replaced when all complete
-	Visit(t.root, func(level int, node IBTreeNode) (skip bool, err error) {
+	Visit(t.root, func(level int, node ILeafNode) (skip bool, err error) {
 		for _, timer := range node.Timer().Report() {
 			fmt.Printf("[%s][%s] start: %s, end: %s duration: %s\n",
 				node.Name(), timer.Label, timer.StartTime.Format("2006/01/02 15:04:05"), timer.EndTime.Format("2006/01/02 15:04:05"), timer.Duration)
@@ -77,10 +77,10 @@ func (t *Tree) PrintTree() {
 	sb := new(strings.Builder)
 	type S struct {
 		level int
-		node  IBTreeNode
+		node  ILeafNode
 	}
 	treeList := glist.New[*S]()
-	Visit(t.root, func(level int, node IBTreeNode) (skip bool, err error) {
+	Visit(t.root, func(level int, node ILeafNode) (skip bool, err error) {
 		treeList.PushBack(&S{level: level, node: node})
 		return false, nil
 	})
@@ -97,15 +97,15 @@ func (t *Tree) PrintTree() {
 	fmt.Println(sb.String())
 }
 
-func (t *Tree) Visit(f func(level int, node IBTreeNode) (skip bool, err error)) error {
+func (t *Tree) Visit(f func(level int, node ILeafNode) (skip bool, err error)) error {
 	return Visit(t.root, f)
 }
 
-func Visit(node IBTreeNode, f func(level int, node IBTreeNode) (skip bool, err error)) error {
+func Visit(node ILeafNode, f func(level int, node ILeafNode) (skip bool, err error)) error {
 	return visit(0, node, f)
 }
 
-func visit(level int, node IBTreeNode, f func(level int, node IBTreeNode) (skip bool, err error)) error {
+func visit(level int, node ILeafNode, f func(level int, node ILeafNode) (skip bool, err error)) error {
 	skip, err := f(level, node)
 	if err != nil {
 		return err
@@ -114,7 +114,7 @@ func visit(level int, node IBTreeNode, f func(level int, node IBTreeNode) (skip 
 		return nil
 	}
 	switch node := node.(type) {
-	case IControlNode:
+	case ITreeNode:
 		for _, child := range node.Children() {
 			if err = visit(level+1, child, f); err != nil {
 				return err

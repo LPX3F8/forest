@@ -28,7 +28,7 @@ type IBTreeNodeWrapper interface {
 	_exit()
 }
 
-type IBTreeNode interface {
+type ILeafNode interface {
 	ID() string
 	Namespace() string
 	Name() string
@@ -46,18 +46,18 @@ type IBTreeNode interface {
 	IBTreeNodeWrapper
 }
 
-type IControlNode interface {
-	IBTreeNode
-	Children() []IBTreeNode
-	AddChild(child ...IBTreeNode)
+type ITreeNode interface {
+	ILeafNode
+	Children() []ILeafNode
+	AddChild(child ...ILeafNode)
 	ChildrenNum() int
 }
 
 type IActionNode interface {
-	IBTreeNode
+	ILeafNode
 }
 
 type IConditionNode interface {
-	IBTreeNode
+	ILeafNode
 	Cond() bool
 }

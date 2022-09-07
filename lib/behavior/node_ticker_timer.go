@@ -25,11 +25,11 @@ func (p *Period) Stop() *Period {
 }
 
 type Timer struct {
-	node    IBTreeNode
+	node    ILeafNode
 	periods *orderedmap.OrderedMap[string, *Period]
 }
 
-func NewSimpleTimer(node IBTreeNode) ITimer {
+func NewSimpleTimer(node ILeafNode) ITimer {
 	return &Timer{
 		node:    node,
 		periods: orderedmap.New[string, *Period](),

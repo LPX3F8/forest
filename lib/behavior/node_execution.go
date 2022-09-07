@@ -8,24 +8,24 @@ func NewAction(tree *Tree, name string, ticker ITicker) *Action {
 	return &Action{NewBaseNode(tree, name, CategoryActionNode, ticker)}
 }
 
-type Condition struct {
+type ConditionNode struct {
 	ITicker
 	*BaseNode
 }
 
 func NewCondition(tree *Tree, name string) IConditionNode {
-	n := &Condition{ITicker: NewBaseTicker()}
+	n := &ConditionNode{ITicker: NewBaseTicker()}
 	n.BaseNode = NewBaseNode(tree, name, CategoryConditionNode, n)
 	return n
 }
 
-func (c *Condition) OnTick() Status {
+func (c *ConditionNode) OnTick() Status {
 	if c.Cond() {
 		return Success
 	}
 	return Failure
 }
 
-func (c *Condition) Cond() bool {
+func (c *ConditionNode) Cond() bool {
 	return false
 }

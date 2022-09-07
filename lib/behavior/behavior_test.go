@@ -109,7 +109,7 @@ func TestTree(t *testing.T) {
 	a.NoError(err)
 	a.Equal(b, b2)
 
-	a.NoError(tree2.Visit(func(level int, node IBTreeNode) (skip bool, err error) {
+	a.NoError(tree2.Visit(func(level int, node ILeafNode) (skip bool, err error) {
 		fmt.Println(level, node)
 		return false, nil
 	}))

@@ -138,10 +138,10 @@ func (n *BaseNode) _closeNode() {
 	n.Blackboard().Set(TreePropOpenNodes, nodes)
 }
 
-func (n *BaseNode) _getOpenNodes() *orderedmap.OrderedMap[string, IBTreeNode] {
-	nodes, ok := GetValue[*orderedmap.OrderedMap[string, IBTreeNode]](n.Blackboard(), TreePropOpenNodes)
+func (n *BaseNode) _getOpenNodes() *orderedmap.OrderedMap[string, ILeafNode] {
+	nodes, ok := GetValue[*orderedmap.OrderedMap[string, ILeafNode]](n.Blackboard(), TreePropOpenNodes)
 	if !ok || nodes == nil {
-		nodes = orderedmap.New[string, IBTreeNode]()
+		nodes = orderedmap.New[string, ILeafNode]()
 	}
 	return nodes
 }

@@ -6,17 +6,17 @@ import (
 
 type CompositeNode struct {
 	*BaseNode
-	children *orderedmap.OrderedMap[string, IBTreeNode]
+	children *orderedmap.OrderedMap[string, ILeafNode]
 }
 
 func NewCompositeNode(tree *Tree, name string, category string, ticker ITicker) *CompositeNode {
 	return &CompositeNode{
 		BaseNode: NewBaseNode(tree, name, category, ticker),
-		children: orderedmap.New[string, IBTreeNode](),
+		children: orderedmap.New[string, ILeafNode](),
 	}
 }
 
-func (n *CompositeNode) Children() []IBTreeNode {
+func (n *CompositeNode) Children() []ILeafNode {
 	return n.children.Slice()
 }
 
@@ -24,7 +24,7 @@ func (n *CompositeNode) ChildrenNum() int {
 	return n.children.Len()
 }
 
-func (n *CompositeNode) AddChild(children ...IBTreeNode) {
+func (n *CompositeNode) AddChild(children ...ILeafNode) {
 	for _, child := range children {
 		if child.ID() == n.ID() {
 			continue
